@@ -18,72 +18,35 @@ var (
 	total_time	int64
 )
 
-func commTest_emptyBulkFind()  {
-	
-}
-/*
+
+
 func commTest_emptyBulkFind(size uint32, f *os.File) {
 
+	var buffer bytes.Buffer
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	var contentArray []interface{}
-	var doc Doc
+	f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
+	data := strings.Repeat("a", (int)(size))
 
 	bulk := mgoSession.DB(db).C(coll).Bulk()
 
+	for i := 0; i < n_pruebas; i++ {
 
+		update := bson.M{"_id": data}
+		selector := bson.M{"_id": " "}
 
-	data := strings.Repeat("a", (int)(sizeData))
+		bulk.Update(selector, update)
 
-	for j := uint32(0); j < tipo_operacion[i]; j++ {
-		create_document(j)
-
-	}
-
-
-
-
-
-
-	count = 0
-	bulk := mgoSession.DB(data_base_).C(col).Bulk()
-
-
-
-	var contentArray []interface{}
-	for j := uint32(0); j < tipo_operacion[i]; j++ {
-
-		var doc Document
-		doc.Id = j
-		doc.Cmp1 = j
-		doc.Cmp2 = j
-		doc.Cmp3 = j
-		doc.Data = data
-
-
-		contentArray =  append(contentArray, &doc)
 		count++
-
-
-		//fmt.Println("count: ",count," contentarray:",contentArray," j: ",j)
-		if  count==1000 || j==tipo_operacion[i]-1  || (uint32)(16000000)<(count+1)*tamannos[i] {
-			fmt.Println("IN: len: ", len(contentArray),
-				" tipo_operacion: ",tipo_operacion[i]," count:",count, " j: ",j)
-			//mgoSession.DB(data_base_).C(col).Insert(&doc)
-			bulk.Insert(contentArray...)
-			_, err := bulk.Run()
-			if err != nil {
-				fmt.Println("ERROR! y: contentArray: ",contentArray," len: ", len(contentArray))
-				panic(err)
-			}
-
-
+		//bulk.Run si: se tienen 1000 elementos || el tamaño no debe superar los 16MB || se deben enviar menos de 1000 elementos
+		if  i%1000==0 || 16000000<(count+1)*int (tamannos[i]) || i+1 == n_pruebas {
+			tini := time.Now()
+			_, err = bulk.Run()
+			total_time = time.Since(tini).Nanoseconds()
+			check(err)
+			_, err = buffer.WriteString(fmt.Sprintf("%d\t%d\t%f\n",i,size,float64(total_time)/float64(1000000)))
+			check(err)
 			count=0
-			//fmt.Println(time.Now(), " col:", col, "( i :", i, "-", nbr_tamannnos, ") (j:", j, "-", tipo_operacion[i], ")")
-			bulk = mgoSession.DB(data_base_).C(col).Bulk()
-			contentArray = nil
-			fmt.Println("END: len: ", len(contentArray),
-				" tipo_operacion: ",tipo_operacion[i]," count:",count, " j: ",j)
 		}
 
 	}
@@ -92,66 +55,17 @@ func commTest_emptyBulkFind(size uint32, f *os.File) {
 
 
 
-
-	tini := time.Now()
-	var col string
-	for i := 0; i < nbr_tamannnos; i++ {
-
-		col = "BYTES_" + fmt.Sprint(tamannos[i]) + ".DAT"
-		sizeData := tamannos[i] - bytesReserved
-		data := strings.Repeat("a", (int)(sizeData))
-
-		count=0
-		bulk := mgoSession.DB(data_base_).C(col).Bulk()
-		var contentArray []interface{}
-		for j := uint32(0); j < tipo_operacion[i]; j++ {
-
-			var doc Document
-			doc.Id = j
-			doc.Cmp1 = j
-			doc.Cmp2 = j
-			doc.Cmp3 = j
-			doc.Data = data
-
-
-			contentArray =  append(contentArray, &doc)
-			count++
-
-
-			//fmt.Println("count: ",count," contentarray:",contentArray," j: ",j)
-			if  count==1000 || j==tipo_operacion[i]-1  || (uint32)(16000000)<(count+1)*tamannos[i] {
-				fmt.Println("IN: len: ", len(contentArray),
-					" tipo_operacion: ",tipo_operacion[i]," count:",count, " j: ",j)
-				//mgoSession.DB(data_base_).C(col).Insert(&doc)
-				bulk.Insert(contentArray...)
-				_, err := bulk.Run()
-				if err != nil {
-					fmt.Println("ERROR! y: contentArray: ",contentArray," len: ", len(contentArray))
-					panic(err)
-				}
-
-
-				count=0
-				//fmt.Println(time.Now(), " col:", col, "( i :", i, "-", nbr_tamannnos, ") (j:", j, "-", tipo_operacion[i], ")")
-				bulk = mgoSession.DB(data_base_).C(col).Bulk()
-				contentArray = nil
-				fmt.Println("END: len: ", len(contentArray),
-					" tipo_operacion: ",tipo_operacion[i]," count:",count, " j: ",j)
-			}
-
-		}
-	}
 }
-*/
+
 
 
 //'n' pruebas de comunicacion para cada tamaño
 func commTest_emptyCount(size uint32, f *os.File)  {
 
 
-	var buffer bytes.Buffer
+	//var buffer bytes.Buffer
 	var times[] float64
-	buffer.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
+	f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
@@ -165,7 +79,7 @@ func commTest_emptyCount(size uint32, f *os.File)  {
 		count, _ = conn.Find(bson.M{"_id": data}).Count()
 		total_time = time.Since(tini).Nanoseconds()
 
-		_, err = buffer.WriteString(fmt.Sprintf("%d\t%d\t%f\n",i,size,float64(total_time)/float64(1000000)))
+		_, err = f.WriteString(fmt.Sprintf("%d\t%d\t%f\n",i,size,float64(total_time)/float64(1000000)))
 		check(err)
 
 		//no almaceno los mayores a un milisegundos (outliers de 20+ms)
@@ -175,8 +89,8 @@ func commTest_emptyCount(size uint32, f *os.File)  {
 
 	}
 
-	_, err = f.WriteString(buffer.String())
-	check(err)
+	//_, err = f.WriteString(buffer.String())
+	//check(err)
 
 	average(times)
 	fmt.Println("----------------------")
