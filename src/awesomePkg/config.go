@@ -8,7 +8,7 @@ var (
  	host		= "127.0.0.1:27017"
 	db			= "test"
 	collCommm	= "emptyColl"
-	coll		= "emptyColl"
+	coll		= "awsColl"
 )
 
 var (

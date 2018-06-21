@@ -1,8 +1,9 @@
 package main
 
+/*
 import (
-	"os"
 	"gopkg.in/mgo.v2"
+	"os"
 	"strings"
 	"time"
 	"gopkg.in/mgo.v2/bson"
@@ -10,14 +11,6 @@ import (
 	"bytes"
 )
 
-/*
-var (
-	query		*mgo.Query
-	count		int
-	err			error
-	total_time	int64
-)
-*/
 
 //'n' pruebas de comunicacion para cada tamaño
 func commTest_emptyCount(size uint32, f *os.File)  {
@@ -232,6 +225,7 @@ func commTest_emptyBulkFind(size uint32, f *os.File) {
 
 }
 
+*/
 
 /*
 

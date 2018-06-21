@@ -7,38 +7,64 @@ import (
 	"fmt"
 )
 
-var (
-	query		*mgo.Query
-	count		int
-	err			error
-	total_time	int64
-)
-
-func insert(query_bson interface{}, f *os.File, size uint32, collection string)  {
 
 
-	mgoSession, _ := mgo.Dial(host)
-	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(collection)
+func insert_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64  {
+	tini := time.Now()
+	err := conn.Insert(query_bson)
+	total_time := time.Since(tini).Nanoseconds()
+	_, err = f.WriteString(fmt.Sprintf("%d\t%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	check(err)
+	return total_time
+}
 
-	f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
-	for i := 0; i < n_pruebas; i++ {
-		tini := time.Now()
-		err = conn.Insert(query_bson)
-		total_time = time.Since(tini).Nanoseconds()
-		_, err = f.WriteString(fmt.Sprintf("%d\t%d\t%f\n",i,size,float64(total_time)/float64(1000000)))
-		check(err)
-	}
+func find_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+	tini := time.Now()
+	query := conn.Find(query_bson)
+	total_time := time.Since(tini).Nanoseconds()
+	_, err := f.WriteString(fmt.Sprintf("%d\t%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	check(err)
+	checkQuery(query)
+	return total_time
+}
 
-	times = append(times,float64(total_time)/float64(1000000))
+func findId_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+	tini := time.Now()
+	query := conn.FindId(query_bson)
+	total_time := time.Since(tini).Nanoseconds()
+	_, err := f.WriteString(fmt.Sprintf("%d\t%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	check(err)
+	checkQuery(query)
+	return total_time
+}
 
-
+func update_op(query_bson interface{},update_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+	tini := time.Now()
+	_, err := conn.UpdateAll(query_bson, update_bson)
+	total_time := time.Since(tini).Nanoseconds()
+	_, err = f.WriteString(fmt.Sprintf("%d\t%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	check(err)
+	return total_time
 }
 
 
+func delete_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+	tini := time.Now()
+	_, err := conn.RemoveAll(query_bson)
+	total_time := time.Since(tini).Nanoseconds()
+	_, err = f.WriteString(fmt.Sprintf("%d\t%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	check(err)
+	return total_time
+}
 
-
-
+func count_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+	tini := time.Now()
+	_, err := conn.Find(query_bson).Count()
+	total_time := time.Since(tini).Nanoseconds()
+	_, err = f.WriteString(fmt.Sprintf("%d\t%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	check(err)
+	return total_time
+}
 
 // Crea test.emptyColl con un validador (para no insertar ningún documento)
 // Si ya existe, no hace nada

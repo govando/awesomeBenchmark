@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"bytes"
+	"gopkg.in/mgo.v2"
 )
 
 func check(e error) {
@@ -10,6 +11,13 @@ func check(e error) {
 		panic(e)
 	}
 }
+
+func uso_tiempos(times[] float64){
+	//de aqui llamar otras funciones que usen tiempos
+
+}
+
+
 
 func average(times []float64)  {
 
@@ -32,3 +40,6 @@ func concat(s1 string, s2 string)  string {
 	return buffer.String()
 }
 
+func checkQuery(query* mgo.Query)  {
+
+}

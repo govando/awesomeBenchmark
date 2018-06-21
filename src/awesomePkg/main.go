@@ -19,9 +19,22 @@ func main() {
     //testComm_emptyFind()
     //testComm_emptyUpdate()
     //testComm_emptyDelete()
-    //clientes[0].testComm_emptyInsert()
 
+    //pruebas de comunicación
+    clientes[0].testComm_emptyCount()
+	clientes[0].testComm_emptyFind()
+	clientes[0].testComm_emptyFindId()
+	clientes[0].testComm_emptyUpdate()
+	clientes[0].testComm_emptyDelete()
+	clientes[0].testComm_emptyInsert()
+
+	//pruebas de benchmark
 	clientes[0].InsertOne()
+	clientes[0].Count()
+	clientes[0].FindOne()
+	clientes[0].FindIdOne()
+	clientes[0].UpdateOne()
+	clientes[0].DeleteOne()
 
 
 
