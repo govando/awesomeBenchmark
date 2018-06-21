@@ -5,9 +5,10 @@ import (
 )
 
 var (
- 	host	= "127.0.0.1:27017"
-	db		= "test"
-	coll	= "emptyColl"
+ 	host		= "127.0.0.1:27017"
+	db			= "test"
+	collCommm	= "emptyColl"
+	coll		= "emptyColl"
 )
 
 var (
@@ -19,5 +20,10 @@ var (
 type Doc struct {
 	ID		bson.ObjectId `bson:"_id,omitempty"`
 	Data	string
-	Cmp1	int
 }
+
+//se usa como Validador de la coleccion de Test Communication
+//permite rechazar todas las operaicones update/insert del tipo Doc
+var (
+	invalidDoc	=  bson.M{"b": bson.M{"$exists": true}}
+)

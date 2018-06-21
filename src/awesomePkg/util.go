@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"bytes"
 )
 
 func check(e error) {
@@ -13,14 +14,21 @@ func check(e error) {
 func average(times []float64)  {
 
 	var avg,value float64
-	//var i int
-	for _, value = range times {
+	var i int
+	for i, value = range times {
 		avg += value
 	}
-	fmt.Printf("total: %f \n",avg)
+	fmt.Printf("total: %f \n",avg/float64(i+1))
 }
 
 func sd()  {
 
+}
+
+func concat(s1 string, s2 string)  string {
+	var buffer bytes.Buffer
+	buffer.WriteString(s1)
+	buffer.WriteString(s2)
+	return buffer.String()
 }
 

@@ -1,30 +1,34 @@
 package main
 
-import (
-
-/*	"gopkg.in/mgo.v2/bson"
-	"fmt"
-	"time"
-	"strings"
-	*///"awesomePkg/awesomeClient"
-)
-
 
 func main() {
 
 	//var c
 //    client()
 
-    create_db()
-	testComm_emptyCount()
-//
+	clientes := make([]Client, 1)
+
+	for i, _ := range clientes{
+		clientes[i].num_cliente = i
+	}
 
 
+    create_CommTestColl()
+
+	//clientes[0].testComm_emptyCount()
+    //testComm_emptyFind()
+    //testComm_emptyUpdate()
+    //testComm_emptyDelete()
+    //clientes[0].testComm_emptyInsert()
+
+	clientes[0].InsertOne()
+
+
+
+    //
 
 	//err := c.Insert(&Person{Name: "Ale", Phone: "+55 53 1234 4321", Timestamp: time.Now()},
 	//	&Person{Name: "Cla", Phone: "+66 33 1234 5678", Timestamp: time.Now()})
-
-
 /*
 	data := strings.Repeat("a", 64)
 	fmt.Println("len: ", len(data))

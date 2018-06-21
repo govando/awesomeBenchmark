@@ -1,12 +1,49 @@
 package main
 
 import (
+	"os"
+	"time"
 	"gopkg.in/mgo.v2"
 	"fmt"
-	"time"
 )
 
-func create_db()  {
+var (
+	query		*mgo.Query
+	count		int
+	err			error
+	total_time	int64
+)
+
+func insert(query_bson interface{}, f *os.File, size uint32, collection string)  {
+
+
+	mgoSession, _ := mgo.Dial(host)
+	defer mgoSession.Close()
+	conn := mgoSession.DB(db).C(collection)
+
+	f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
+	for i := 0; i < n_pruebas; i++ {
+		tini := time.Now()
+		err = conn.Insert(query_bson)
+		total_time = time.Since(tini).Nanoseconds()
+		_, err = f.WriteString(fmt.Sprintf("%d\t%d\t%f\n",i,size,float64(total_time)/float64(1000000)))
+		check(err)
+	}
+
+	times = append(times,float64(total_time)/float64(1000000))
+
+
+}
+
+
+
+
+
+
+// Crea test.emptyColl con un validador (para no insertar ningún documento)
+// Si ya existe, no hace nada
+// Uso exclusivo para pruebas de comunicación
+func create_CommTestColl()  {
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
@@ -16,7 +53,6 @@ func create_db()  {
 
 	exist := 0
 
-	// Collection People
 	conn := mgoSession.DB(db)
 
 	names, err := conn.CollectionNames()
@@ -37,7 +73,8 @@ func create_db()  {
 	if exist == 0{
 		// Create a Collection
 		err := conn.C(coll).Create(&mgo.CollectionInfo{
-			DisableIdIndex:false, Capped: false, ValidationLevel: "off"})
+			DisableIdIndex:false, Capped: false, ValidationLevel: "strict", Validator: invalidDoc,
+		})
 		if err != nil {
 			panic(err)
 		} else {
