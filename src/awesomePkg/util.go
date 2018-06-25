@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"bytes"
 	"gopkg.in/mgo.v2"
 	"runtime"
+	"strconv"
 )
 
 func check(e error) {
@@ -18,9 +18,19 @@ func uso_tiempos(times[] float64){
 
 }
 
-func environment()  {
-	fmt.Println("La aplicación usará",runtime.NumCPU()," CPU" )
 
+func environment()  {
+	fmt.Println("La aplicación usará:\n",runtime.NumCPU()," CPU \n",nClientes," clientes" )
+
+}
+
+func parserInput(input[] string){
+	var error error
+
+	if len(input) > 1 {
+		nClientes, error = strconv.Atoi(input[1])
+		check(error)
+	}
 }
 
 func average(times []float64)  {
@@ -35,13 +45,6 @@ func average(times []float64)  {
 
 func sd()  {
 
-}
-
-func concat(s1 string, s2 string)  string {
-	var buffer bytes.Buffer
-	buffer.WriteString(s1)
-	buffer.WriteString(s2)
-	return buffer.String()
 }
 
 func checkQuery(query* mgo.Query)  {

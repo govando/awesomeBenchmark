@@ -112,3 +112,12 @@ func create_CommTestColl()  {
 	time.Sleep(1000)
 
 }
+
+func cleanColl(coll string){
+	mgoSession, _ := mgo.Dial(host)
+	defer mgoSession.Close()
+
+	conn := mgoSession.DB(db).C(coll)
+	conn.RemoveAll(nil)
+
+}

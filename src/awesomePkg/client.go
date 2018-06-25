@@ -12,6 +12,8 @@ import (
 	"strings"
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
+	"sync"
+	
 )
 
 //  Benchmark de latencia de comunicación
@@ -21,16 +23,18 @@ import (
 
 type Client struct {
 	num_cliente int //identificador
-	time_init uint64
+	timestamp 	uint64
+
+	totalOp		clientData
 }
 
-func (c *Client) testComm_emptyCount()  {
+func (c *Client) testComm_emptyCount(wg *sync.WaitGroup)  {
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collCommm)
 
 	//borrar y crear el archivo de datos
 	f, err := os.Create( "./data/Comm/count/dataCommCount"+strconv.Itoa(c.num_cliente))
@@ -42,18 +46,21 @@ func (c *Client) testComm_emptyCount()  {
 		for i := 0; i < n_pruebas; i++ {
 			total_time := count_op(query_bson , f, size, collCommm, conn)
 			times = append(times, float64(total_time)/float64(1000000))
+			c.totalOp.CountComm+=1
 		}
 		uso_tiempos(times) //agregar metodos aquí
 	}
+
+	wg.Done()
 }
 
-func (c Client) testComm_emptyFind()  {
+func (c *Client) testComm_emptyFind(wg *sync.WaitGroup)  {
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collCommm)
 	//borrar y crear el archivo de datos
 	f, err := os.Create("./data/Comm/find/dataCommFind"+strconv.Itoa(c.num_cliente))
 	check(err)
@@ -65,18 +72,20 @@ func (c Client) testComm_emptyFind()  {
 		for i := 0; i < n_pruebas; i++ {
 			total_time := find_op(query_bson , f, size, collCommm, conn)
 			times = append(times, float64(total_time)/float64(1000000))
+			c.totalOp.FindComm+=1
 		}
 		uso_tiempos(times) //agregar metodos aquí
 	}
+	wg.Done()
 }
 
-func (c Client) testComm_emptyFindId()  {
+func (c *Client) testComm_emptyFindId(wg *sync.WaitGroup)  {
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collCommm)
 	//borrar y crear el archivo de datos
 	f, err := os.Create("./data/Comm/find/dataCommFind"+strconv.Itoa(c.num_cliente))
 	check(err)
@@ -88,18 +97,20 @@ func (c Client) testComm_emptyFindId()  {
 		for i := 0; i < n_pruebas; i++ {
 			total_time := findId_op(query_bson , f, size, collCommm, conn)
 			times = append(times, float64(total_time)/float64(1000000))
+			c.totalOp.FindIdComm+=1
 		}
 		uso_tiempos(times) //agregar metodos aquí
 	}
+	wg.Done()
 }
 
-func (c Client) testComm_emptyUpdate()  {
+func (c *Client) testComm_emptyUpdate(wg *sync.WaitGroup)  {
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collCommm)
 
 	//borrar y crear el archivo de datos
 	f, err := os.Create("./data/Comm/update/dataCommUpdate"+strconv.Itoa(c.num_cliente))
@@ -113,20 +124,20 @@ func (c Client) testComm_emptyUpdate()  {
 		for i := 0; i < n_pruebas; i++ {
 			total_time := update_op(query_bson ,update_bson, f, size, collCommm, conn)
 			times = append(times, float64(total_time)/float64(1000000))
-
+			c.totalOp.UpdateComm+=1
 		}
 		uso_tiempos(times) //agregar metodos aquí
 	}
-
+	wg.Done()
 }
 
-func  (c Client) testComm_emptyDelete()  {
+func  (c *Client) testComm_emptyDelete(wg *sync.WaitGroup)  {
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collCommm)
 
 	//borrar y crear el archivo de datos
 	f, err := os.Create("./data/Comm/delete/dataCommDelete"+strconv.Itoa(c.num_cliente))
@@ -139,18 +150,20 @@ func  (c Client) testComm_emptyDelete()  {
 		for i := 0; i < n_pruebas; i++ {
 			total_time := delete_op(query_bson, f, size, collCommm, conn)
 			times = append(times, float64(total_time)/float64(1000000))
+			c.totalOp.DeleteComm+=1
 		}
 		uso_tiempos(times) //no hace nada aun
 	}
+	wg.Done()
 }
 
-func  (c Client) testComm_emptyInsert(){
+func  (c *Client) testComm_emptyInsert(wg *sync.WaitGroup){
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collCommm)
 
 	//borrar y crear el archivo de datos
 	f, err := os.Create("./data/Comm/insert/dataCommInsert"+strconv.Itoa(c.num_cliente))
@@ -163,24 +176,24 @@ func  (c Client) testComm_emptyInsert(){
 		for i := 0; i < n_pruebas; i++ {
 			total_time := insert_op(query_bson, f, size, collCommm, conn)
 			times = append(times, float64(total_time)/float64(1000000))
+			c.totalOp.InsertComm+=1
 		}
 		uso_tiempos(times) //no hace nada aun
 	}
-
+	wg.Done()
 }
 
 // Benchmarks de latencias por operacion
 // Modificar aquí los query_bson
 /*------------------------------------------------*/
 
-func  (c Client) InsertOne(){
+func  (c *Client) InsertOne(wg *sync.WaitGroup){
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
-
+	conn := mgoSession.DB(db).C(collBench)
 
 	//borrar y crear el archivo de datos
 	f, err := os.Create("./data/Query/insert/dataInsert"+strconv.Itoa(c.num_cliente))
@@ -189,25 +202,25 @@ func  (c Client) InsertOne(){
 
 	for _, size := range tamannos {
 		data := strings.Repeat("a", int(size))
-
 		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		for i := 0; i < n_pruebas; i++ {
 			query_bson := bson.M{"data":data ,"cliente":c.num_cliente,"cmp1": i, "cmp2": i, "cmp3": i}
-			total_time := insert_op(query_bson, f, size,coll, conn)
+			total_time := insert_op(query_bson, f, size,collBench, conn)
 			times = append(times,float64(total_time)/float64(1000000))
+			c.totalOp.Insert+=1.
 		}
 		uso_tiempos(times)
 	}
+	wg.Done()
 }
 
-
-func (c Client) DeleteOne(){
+func (c *Client) DeleteOne(wg *sync.WaitGroup){
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collBench)
 
 	//borrar y crear el archivo de datos
 	f, err := os.Create("./data/Query/delete/dataDelete"+strconv.Itoa(c.num_cliente))
@@ -220,20 +233,50 @@ func (c Client) DeleteOne(){
 		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		for i := 0; i < n_pruebas; i++ {
 			query_bson := bson.M{"data": data, "cmp1": i}
-			total_time := delete_op(query_bson, f, size,coll, conn)
+			total_time := delete_op(query_bson, f, size,collBench, conn)
 			times = append(times,float64(total_time)/float64(1000000))
+			c.totalOp.Delete+=1
 		}
 		uso_tiempos(times)
 	}
+	wg.Done()
 }
 
-func  (c Client) Count(){
+func  (c *Client) Count(wg *sync.WaitGroup){
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collBench)
+
+	//borrar y crear el archivo de datos
+	f, err := os.Create("./data/Query/count/dataCount"+strconv.Itoa(c.num_cliente))
+	check(err)
+	defer f.Close()
+
+	for _, size := range tamannos {
+		data := strings.Repeat("a", int(size))
+
+		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
+		for i := 0; i < n_pruebas; i++ {
+			query_bson := bson.M{"data": data,"cliente":c.num_cliente, "cmp1": i}
+			total_time := count_op(query_bson, f, size,collBench, conn)
+			times = append(times,float64(total_time)/float64(1000000))
+			c.totalOp.Count+=1
+		}
+		uso_tiempos(times)
+	}
+	wg.Done()
+}
+
+func  (c *Client) FindOne(wg *sync.WaitGroup){
+
+	var times[] float64
+
+	mgoSession, _ := mgo.Dial(host)
+	defer mgoSession.Close()
+	conn := mgoSession.DB(db).C(collBench)
 
 	//borrar y crear el archivo de datos
 	f, err := os.Create("./data/Query/find/dataFind"+strconv.Itoa(c.num_cliente))
@@ -246,51 +289,25 @@ func  (c Client) Count(){
 		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		for i := 0; i < n_pruebas; i++ {
 			query_bson := bson.M{"data": data,"cliente":c.num_cliente, "cmp1": i}
-			total_time := count_op(query_bson, f, size,coll, conn)
+			total_time := find_op(query_bson, f, size,collBench, conn)
 			times = append(times,float64(total_time)/float64(1000000))
+			c.totalOp.Find+=1
 		}
 		uso_tiempos(times)
 	}
-
+	wg.Done()
 }
 
-func  (c Client) FindOne(){
+func  (c *Client) FindIdOne(wg *sync.WaitGroup){
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collBench)
 
 	//borrar y crear el archivo de datos
-	f, err := os.Create("./data/Query/find/dataFind"+strconv.Itoa(c.num_cliente))
-	check(err)
-	defer f.Close()
-
-	for _, size := range tamannos {
-		data := strings.Repeat("a", int(size))
-
-		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
-		for i := 0; i < n_pruebas; i++ {
-			query_bson := bson.M{"data": data,"cliente":c.num_cliente, "cmp1": i}
-			total_time := find_op(query_bson, f, size,coll, conn)
-			times = append(times,float64(total_time)/float64(1000000))
-		}
-		uso_tiempos(times)
-	}
-
-}
-
-func  (c Client) FindIdOne(){
-
-	var times[] float64
-
-	mgoSession, _ := mgo.Dial(host)
-	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
-
-	//borrar y crear el archivo de datos
-	f, err := os.Create("./data/Query/find/dataFind"+strconv.Itoa(c.num_cliente))
+	f, err := os.Create("./data/Query/findId/dataFindId"+strconv.Itoa(c.num_cliente))
 	check(err)
 	defer f.Close()
 
@@ -300,21 +317,22 @@ func  (c Client) FindIdOne(){
 		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		for i := 0; i < n_pruebas; i++ {
 			query_bson := bson.M{"data": data, "cmp1": i}
-			total_time := findId_op(query_bson, f, size,coll, conn)
+			total_time := findId_op(query_bson, f, size,collBench, conn)
 			times = append(times,float64(total_time)/float64(1000000))
+			c.totalOp.FindId+=1
 		}
 		uso_tiempos(times)
 	}
-
+	wg.Done()
 }
 
-func (c Client) UpdateOne(){
+func (c *Client) UpdateOne(wg *sync.WaitGroup){
 
 	var times[] float64
 
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
-	conn := mgoSession.DB(db).C(coll)
+	conn := mgoSession.DB(db).C(collBench)
 	//borrar y crear el archivo de datos
 	f, err := os.Create("./data/Query/update/dataUpdate"+strconv.Itoa(c.num_cliente))
 	check(err)
@@ -327,12 +345,13 @@ func (c Client) UpdateOne(){
 		for i := 0; i < n_pruebas; i++ {
 			query_bson := bson.M{"data": data, "cmp1": i}
 			update_bson := bson.M{"data": data, "cmp1": i, "cmp2": i, "cmp3": i}
-			total_time := update_op(query_bson,update_bson, f, size,coll, conn)
+			total_time := update_op(query_bson,update_bson, f, size,collBench, conn)
 			times = append(times,float64(total_time)/float64(1000000))
+			c.totalOp.Update+=1
 		}
 		uso_tiempos(times)
 	}
-
+	wg.Done()
 }
 
 

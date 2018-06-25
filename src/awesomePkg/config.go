@@ -8,7 +8,8 @@ var (
  	host		= "127.0.0.1:27017"
 	db			= "test"
 	collCommm	= "emptyColl"
-	coll		= "awsColl"
+	collBench	= "awsColl"
+	nClientes 	= 10
 )
 
 var (
@@ -20,6 +21,9 @@ var (
 type Doc struct {
 	ID		bson.ObjectId `bson:"_id,omitempty"`
 	Data	string
+	Cmp1	int
+	Cmp2	int
+	Cmp3	int
 }
 
 //se usa como Validador de la coleccion de Test Communication
