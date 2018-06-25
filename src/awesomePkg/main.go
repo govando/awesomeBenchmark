@@ -1,41 +1,56 @@
 package main
 
+import (
+	"fmt"
+	"sync"
+	"github.com/lib/pq/oid"
+	"os"
+	"strconv"
+)
 
 func main() {
 
-	//var c
-//    client()
+	var wg sync.WaitGroup
+	nClientes := 10
 
-	clientes := make([]Client, 1)
+	if len(os.Args) > 1 {
+		nClientes, err := strconv.Atoi(os.Args[1])
+		check(err)
+	}
 
+	environment()
+	clientes := make([]Client, nClientes)
+	
+
+	wg.Add(nClientes)
 	for i, _ := range clientes{
 		clientes[i].num_cliente = i
 	}
 
 
-    create_CommTestColl()
-
-	//clientes[0].testComm_emptyCount()
-    //testComm_emptyFind()
-    //testComm_emptyUpdate()
-    //testComm_emptyDelete()
+    create_CommTestColl() //si no existe, se crea coleccion para probar comunicación
 
     //pruebas de comunicación
-    clientes[0].testComm_emptyCount()
-	clientes[0].testComm_emptyFind()
-	clientes[0].testComm_emptyFindId()
-	clientes[0].testComm_emptyUpdate()
-	clientes[0].testComm_emptyDelete()
-	clientes[0].testComm_emptyInsert()
+	for i, _ := range clientes{
+		go clientes[i].testComm_emptyCount()
+	}
+
+	clientes[i].testComm_emptyFind()
+	clientes[i].testComm_emptyFindId()
+	clientes[i].testComm_emptyUpdate()
+	clientes[i].testComm_emptyDelete()
+	clientes[i].testComm_emptyInsert()
+
 
 	//pruebas de benchmark
+	/*
 	clientes[0].InsertOne()
 	clientes[0].Count()
 	clientes[0].FindOne()
 	clientes[0].FindIdOne()
 	clientes[0].UpdateOne()
 	clientes[0].DeleteOne()
-
+	*/
 
 
     //

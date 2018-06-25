@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"bytes"
 	"gopkg.in/mgo.v2"
+	"runtime"
 )
 
 func check(e error) {
@@ -17,7 +18,10 @@ func uso_tiempos(times[] float64){
 
 }
 
+func environment()  {
+	fmt.Println("La aplicación usará",runtime.NumCPU()," CPU" )
 
+}
 
 func average(times []float64)  {
 

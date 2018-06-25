@@ -14,13 +14,17 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-//Benchmark de latencia de comunicación
-//operacion + colecion (comm o bench) + size request + request
+//  Benchmark de latencia de comunicación
+//  operacion + colecion (comm o bench) + size request + request
+//
+//  query_bson := bson.M{"data": data, "cmp1": i}
+
 type Client struct {
 	num_cliente int //identificador
+	time_init uint64
 }
 
-func (c Client) testComm_emptyCount()  {
+func (c *Client) testComm_emptyCount()  {
 
 	var times[] float64
 
@@ -166,6 +170,7 @@ func  (c Client) testComm_emptyInsert(){
 }
 
 // Benchmarks de latencias por operacion
+// Modificar aquí los query_bson
 /*------------------------------------------------*/
 
 func  (c Client) InsertOne(){
@@ -187,7 +192,7 @@ func  (c Client) InsertOne(){
 
 		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		for i := 0; i < n_pruebas; i++ {
-			query_bson := bson.M{"data":data ,"cmp1": i, "cmp2": i, "cmp3": i}
+			query_bson := bson.M{"data":data ,"cliente":c.num_cliente,"cmp1": i, "cmp2": i, "cmp3": i}
 			total_time := insert_op(query_bson, f, size,coll, conn)
 			times = append(times,float64(total_time)/float64(1000000))
 		}
@@ -221,7 +226,8 @@ func (c Client) DeleteOne(){
 		uso_tiempos(times)
 	}
 }
-func  (c Client) Coun(){
+
+func  (c Client) Count(){
 
 	var times[] float64
 
@@ -239,7 +245,7 @@ func  (c Client) Coun(){
 
 		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		for i := 0; i < n_pruebas; i++ {
-			query_bson := bson.M{"data": data, "cmp1": i}
+			query_bson := bson.M{"data": data,"cliente":c.num_cliente, "cmp1": i}
 			total_time := count_op(query_bson, f, size,coll, conn)
 			times = append(times,float64(total_time)/float64(1000000))
 		}
@@ -266,7 +272,7 @@ func  (c Client) FindOne(){
 
 		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		for i := 0; i < n_pruebas; i++ {
-			query_bson := bson.M{"data": data, "cmp1": i}
+			query_bson := bson.M{"data": data,"cliente":c.num_cliente, "cmp1": i}
 			total_time := find_op(query_bson, f, size,coll, conn)
 			times = append(times,float64(total_time)/float64(1000000))
 		}
