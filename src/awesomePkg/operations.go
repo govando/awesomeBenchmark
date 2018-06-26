@@ -19,10 +19,11 @@ func insert_op(query_bson interface{}, f *os.File, size uint32, collection strin
 }
 
 func find_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+	var query *mgo.Query
 	tini := time.Now()
-	query := conn.Find(query_bson)
+	err := conn.Find(query_bson).One(&query)
 	total_time := time.Since(tini).Nanoseconds()
-	_, err := f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
 	check(err)
 	checkQuery(query)
 	return total_time

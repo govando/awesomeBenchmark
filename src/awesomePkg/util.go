@@ -27,10 +27,17 @@ func environment()  {
 func parserInput(input[] string){
 	var error error
 
-	if len(input) > 1 {
+	if len(input) == 2 {
 		nClientes, error = strconv.Atoi(input[1])
 		check(error)
+	} else if len(input) == 3 {
+		nClientes, error = strconv.Atoi(input[1])
+		check(error)
+		nOperacion, error = strconv.Atoi(input[1])
+		check(error)
 	}
+
+
 }
 
 func average(times []float64)  {
@@ -41,6 +48,10 @@ func average(times []float64)  {
 		avg += value
 	}
 	fmt.Printf("total: %f \n",avg/float64(i+1))
+}
+
+func randNumbers()  {
+
 }
 
 func sd()  {

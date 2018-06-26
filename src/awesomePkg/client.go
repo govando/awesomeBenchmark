@@ -41,7 +41,10 @@ func (c *Client) testComm_emptyCount(wg *sync.WaitGroup)  {
 	check(err)
 	defer f.Close()
 
-	for _, size := range tamannos {data := strings.Repeat("a", int(size))
+	for _, size := range tamannos {
+
+		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
+		data := strings.Repeat("a", int(size))
 		query_bson := bson.M{"_id": data}
 		for i := 0; i < n_pruebas; i++ {
 			total_time := count_op(query_bson , f, size, collCommm, conn)
@@ -67,8 +70,9 @@ func (c *Client) testComm_emptyFind(wg *sync.WaitGroup)  {
 	defer f.Close()
 
 	for _, size := range tamannos {
+		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		data := strings.Repeat("a", int(size))
-		query_bson := bson.M{"_id": data}
+		query_bson := bson.M{"b": data}
 		for i := 0; i < n_pruebas; i++ {
 			total_time := find_op(query_bson , f, size, collCommm, conn)
 			times = append(times, float64(total_time)/float64(1000000))
@@ -87,11 +91,12 @@ func (c *Client) testComm_emptyFindId(wg *sync.WaitGroup)  {
 	defer mgoSession.Close()
 	conn := mgoSession.DB(db).C(collCommm)
 	//borrar y crear el archivo de datos
-	f, err := os.Create("./data/Comm/find/dataCommFind"+strconv.Itoa(c.num_cliente))
+	f, err := os.Create("./data/Comm/findId/dataCommFindId"+strconv.Itoa(c.num_cliente))
 	check(err)
 	defer f.Close()
 
 	for _, size := range tamannos {
+		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		data := strings.Repeat("a", int(size))
 		query_bson := bson.M{"_id": data}
 		for i := 0; i < n_pruebas; i++ {
@@ -118,6 +123,7 @@ func (c *Client) testComm_emptyUpdate(wg *sync.WaitGroup)  {
 	defer f.Close()
 
 	for _, size := range tamannos {
+		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		data := strings.Repeat("a", int(size))
 		query_bson := bson.M{"_id": data}
 		update_bson := bson.M{"_id": "0"}
@@ -145,6 +151,7 @@ func  (c *Client) testComm_emptyDelete(wg *sync.WaitGroup)  {
 	defer f.Close()
 
 	for _, size := range tamannos {
+		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		data := strings.Repeat("a", int(size))
 		query_bson := bson.M{"_id": data}
 		for i := 0; i < n_pruebas; i++ {
@@ -171,6 +178,7 @@ func  (c *Client) testComm_emptyInsert(wg *sync.WaitGroup){
 	defer f.Close()
 
 	for _, size := range tamannos {
+		f.WriteString("\nn\tTamano(bytes)\tTiempo(ms)\n")
 		data := strings.Repeat("a", int(size))
 		query_bson := bson.M{"_id": data}
 		for i := 0; i < n_pruebas; i++ {

@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+//input programa:
+// param1: nro clientes  param2: nro de operacion
 func main() {
 
 	var wg sync.WaitGroup
@@ -19,15 +21,21 @@ func main() {
 
 	// Lógica de ejecución //
 
-/*
+
 
     admin.createCommDB() //si no existe, se crea coleccion para testear comunicación
+
     //--- Pruebas de comunicación para cada primitiva
+
+
+
+	wg.Add(nClientes)
 	for i, _ := range clientes{
 		go clientes[i].testComm_emptyCount(&wg)
 	}
 	wg.Wait()
 
+	/*
 	wg.Add(nClientes)
 	for i, _ := range clientes{
 		go clientes[i].testComm_emptyFind(&wg)
@@ -39,6 +47,7 @@ func main() {
 		go clientes[i].testComm_emptyFindId(&wg)
 	}
 	wg.Wait()
+
 
 	wg.Add(nClientes)
 	for i, _ := range clientes{
@@ -57,11 +66,12 @@ func main() {
 		go clientes[i].testComm_emptyInsert(&wg)
 	}
 	wg.Wait()
-
-	resumenComm(clientes)
 */
+	resumenComm(clientes)
+
 
 	//pruebas de benchmark de primitivas
+
 	admin.cleanCollection(collBench)
 	wg.Add(nClientes)
 	for i, _ := range clientes{
@@ -69,31 +79,37 @@ func main() {
 	}
 	wg.Wait()
 
+
 	wg.Add(nClientes)
 	for i, _ := range clientes{
 		go clientes[i].Count(&wg)
 	}
 	wg.Wait()
+
 	wg.Add(nClientes)
 	for i, _ := range clientes{
 		go clientes[i].FindOne(&wg)
 	}
 	wg.Wait()
+
 	wg.Add(nClientes)
 	for i, _ := range clientes{
 		go clientes[i].FindIdOne(&wg)
 	}
 	wg.Wait()
+
 	wg.Add(nClientes)
 	for i, _ := range clientes{
 		go clientes[i].UpdateOne(&wg)
 	}
 	wg.Wait()
+
 	wg.Add(nClientes)
 	for i, _ := range clientes{
 		go clientes[i].DeleteOne(&wg)
 	}
 	wg.Wait()
+
 
 	resumenBenchmark(clientes)
 }
