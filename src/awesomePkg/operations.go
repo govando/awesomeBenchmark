@@ -5,63 +5,94 @@ import (
 	"time"
 	"gopkg.in/mgo.v2"
 	"fmt"
+	"strings"
 )
 
 
 
-func insert_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64  {
+func insert_op(query_bson interface{}, coll* mgo.Collection) int64  {
 	tini := time.Now()
-	err := conn.Insert(query_bson)
+	err := coll.Insert(query_bson)
 	total_time := time.Since(tini).Nanoseconds()
-	_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
-	check(err)
+	//_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	if err!=nil {
+		if strings.Contains(err.Error(),"duplicate key")==false {
+			fmt.Println(" ===> ",err)
+			check(err)
+		}  else{
+			//fmt.Println("error insert : ",err)
+		}
+	}
 	return total_time
 }
 
-func find_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+func find_op(query_bson interface{},  coll* mgo.Collection) int64 {
+	var query *mgo.Query
+
 	tini := time.Now()
-	query := conn.Find(query_bson)
+
+	err := coll.Find(query_bson).One(&query)
+	fmt.Println("--------------------------->query:",query)
+
 	total_time := time.Since(tini).Nanoseconds()
-	_, err := f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	//_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
 	check(err)
 	checkQuery(query)
 	return total_time
 }
 
-func findId_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+func find_op2(query_bson interface{},  coll* mgo.Collection) (int64, Doc) {
+	//var query *mgo.Query
+	var doc Doc
 	tini := time.Now()
-	query := conn.FindId(query_bson)
+	err := coll.Find(query_bson).One(&doc)
+	if (err != nil) {
+		fmt.Println("error:", err, " ==> ", doc)
+	}
+	//err := coll.Find(query_bson).One(&query)
+
 	total_time := time.Since(tini).Nanoseconds()
-	_, err := f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	//_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
+
 	check(err)
-	checkQuery(query)
+	//checkQuery(query)
+	return total_time, doc
+}
+
+func findId_op(query_bson interface{}, f *os.File, size uint32, collection string, coll* mgo.Collection) int64 {
+	var results interface{}
+	tini := time.Now()
+	coll.FindId(query_bson).One(&results)
+	total_time := time.Since(tini).Nanoseconds()
+	//_, err := f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	//check(err)
 	return total_time
 }
 
-func update_op(query_bson interface{},update_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+func update_op(query_bson interface{},update_bson interface{}, coll* mgo.Collection) int64  {
 	tini := time.Now()
-	_, err := conn.UpdateAll(query_bson, update_bson)
+	err := coll.Update(query_bson, update_bson)
 	total_time := time.Since(tini).Nanoseconds()
-	_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	//_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
 	check(err)
 	return total_time
 }
 
 
-func delete_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+func delete_op(query_bson interface{}, coll* mgo.Collection) int64 {
 	tini := time.Now()
-	_, err := conn.RemoveAll(query_bson)
+	_, err := coll.RemoveAll(query_bson)
 	total_time := time.Since(tini).Nanoseconds()
-	_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	//_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
 	check(err)
 	return total_time
 }
 
-func count_op(query_bson interface{}, f *os.File, size uint32, collection string, conn* mgo.Collection) int64 {
+func count_op(query_bson interface{}, coll* mgo.Collection) int64 {
 	tini := time.Now()
-	_, err := conn.Find(query_bson).Count()
+	_, err := coll.Find(query_bson).Count()
 	total_time := time.Since(tini).Nanoseconds()
-	_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
+	//_, err = f.WriteString(fmt.Sprintf("%d\t%f\n",size,float64(total_time)/float64(1000000)))
 	check(err)
 	return total_time
 }
@@ -75,13 +106,13 @@ func create_CommTestColl()  {
 	defer mgoSession.Close()
 
 	db := "test"
-	coll := "emptyColl"
+
 
 	exist := 0
 
-	conn := mgoSession.DB(db)
+	sesion := mgoSession.DB(db)
 
-	names, err := conn.CollectionNames()
+	names, err := sesion.CollectionNames()
 	if err != nil {
 		fmt.Println("Failed to get coll names: %v", err)
 		return
@@ -89,7 +120,7 @@ func create_CommTestColl()  {
 
 	// Simply search in the names slice, e.g.
 	for _, name := range names {
-		if name == coll {
+		if name == collCommm {
 			fmt.Println("The collection exists!")
 			exist=1
 			break
@@ -98,7 +129,7 @@ func create_CommTestColl()  {
 
 	if exist == 0{
 		// Create a Collection
-		err := conn.C(coll).Create(&mgo.CollectionInfo{
+		err := sesion.C(collCommm).Create(&mgo.CollectionInfo{
 			DisableIdIndex:false, Capped: false, ValidationLevel: "strict", Validator: invalidDoc,
 		})
 		if err != nil {
@@ -113,11 +144,27 @@ func create_CommTestColl()  {
 
 }
 
-func cleanColl(coll string){
+func cleanColl(collName string){
 	mgoSession, _ := mgo.Dial(host)
 	defer mgoSession.Close()
 
-	conn := mgoSession.DB(db).C(coll)
-	conn.RemoveAll(nil)
-
+	coll := mgoSession.DB(db).C(collName)
+	coll.RemoveAll(nil)
 }
+
+func dropColl(coll *mgo.Collection)  {
+	coll.DropCollection()
+}
+
+func tryConnection()  {
+
+	mgoSession, err := mgo.Dial(host)
+	for err!=nil  {
+		fmt.Println("tratando de conectar")
+		mgoSession, err = mgo.Dial(host)
+		time.Sleep(1 * time.Second)
+	}
+
+	mgoSession.Close()
+}
+

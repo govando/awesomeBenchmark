@@ -3,6 +3,7 @@ package main
 import (
 
 	"fmt"
+	"gopkg.in/mgo.v2"
 )
 
 type Admin struct {
@@ -41,6 +42,18 @@ func (c *Admin) createCommDB()  {
 
 func (c * Admin) cleanCollection(coll string){
 	cleanColl(coll)
+}
+
+func (c * Admin) cleanDB()  {
+	mgoSession, _ := mgo.Dial(host)
+	defer mgoSession.Close()
+
+	fmt.Println("Admin: Borrando colleciones")
+	for _, size := range tamannos {
+			coll := mgoSession.DB(db).C(fmt.Sprintf("%v_%d", collBench, size))
+			dropColl(coll)
+	}
+
 }
 
 func (c *Admin) createIndex()  {
